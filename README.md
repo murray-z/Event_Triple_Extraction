@@ -1,6 +1,11 @@
 # Event_Triple_Extraction
-采用LTP抽取事件三元组
+> 采用LTP抽取事件三元组
 
+
+### 安装包
+- pip install plt
+
+### 使用
 
 ```
 from triple_extraction_ltp import TripleExtraction
@@ -19,5 +24,6 @@ for text in [content1, content2]:
 
 ```
 
+### 项目来源
 - 根据https://github.com/liuhuanyong/EventTriplesExtraction改编，替换pyltp为ltp;
 - pyltp太难安装了..........
