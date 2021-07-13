@@ -1,0 +1,2 @@
+# Event_Triple_Extraction
+采用LTP抽取事件三元组
