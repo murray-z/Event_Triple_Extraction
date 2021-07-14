@@ -6,7 +6,6 @@
 替换pyltp为ltp;
 """
 
-import re
 from ltp import LTP
 
 
@@ -38,13 +37,11 @@ class LtpParser:
             child_dict_list.append(child_dict)
         rely_id = [arc[1] for arc in arcs]  # 提取依存父节点id
         relation = [arc[2] for arc in arcs]  # 提取依存关系
-        # print('test', rely_id, relation)
         heads = ['Root' if id == 0 else words[id - 1] for id in rely_id]  # 匹配依存父节点词语
         for i in range(len(words)):
             # ['ATT', '李克强', 0, 'nh', '总理', 1, 'n']
             a = [relation[i], words[i], i, postags[i], heads[i], rely_id[i]-1, postags[rely_id[i]-1]]
             format_parse_list.append(a)
-
         return child_dict_list, format_parse_list
 
     '''parser主函数'''
@@ -65,7 +62,7 @@ class TripleExtraction():
 
     '''文章分句处理, 切分长句，冒号，分号，感叹号等做切分标识'''
     def split_sents(self, content):
-        return [sentence for sentence in re.split(r'[？?！!。；;：:\n\r]', content) if sentence]
+        return self.parser.ltp.sent_split([content])
 
     '''利用语义角色标注,直接获取主谓宾三元组,基于A0,A1,A2'''
     def ruler1(self, words, postags, roles_dict, role_index):
@@ -78,15 +75,6 @@ class TripleExtraction():
                          postags[word_index][0] not in ['w', 'u', 'x'] and words[word_index]])
             if s and o:
                 return '1', [s, v, o]
-        # elif 'A0' in role_info:
-        #     s = ''.join([words[word_index] for word_index in range(role_info['A0'][1], role_info['A0'][2] + 1) if
-        #                  postags[word_index][0] not in ['w', 'u', 'x']])
-        #     if s:
-        #         return '2', [s, v]
-        # elif 'A1' in role_info:
-        #     o = ''.join([words[word_index] for word_index in range(role_info['A1'][1], role_info['A1'][2]+1) if
-        #                  postags[word_index][0] not in ['w', 'u', 'x']])
-        #     return '3', [v, o]
         return '4', []
 
     '''三元组抽取主函数'''
@@ -164,15 +152,3 @@ class TripleExtraction():
             svo = self.ruler2(words, postags, child_dict_list, arcs, roles_dict)
             svos += svo
         return svos
-
-
-if __name__ == '__main__':
-    content1 = '李克强总理今天来我家了,我感到非常荣幸'
-    content2 = ''' 以色列国防军20日对加沙地带实施轰炸，造成3名巴勒斯坦武装人员死亡。此外，巴勒斯坦人与以色列士兵当天在加沙地带与以交界地区发生冲突，一名巴勒斯坦人被打死。当天的冲突还造成210名巴勒斯坦人受伤。
-    当天，数千名巴勒斯坦人在加沙地带边境地区继续“回归大游行”抗议活动。部分示威者燃烧轮胎，并向以军投掷石块、燃烧瓶等，驻守边境的以军士兵向示威人群发射催泪瓦斯并开枪射击。'''
-
-    extractor = TripleExtraction()
-    for text in [content1, content2]:
-        print(text)
-        res = extractor.triples_main(text)
-        print(res)
